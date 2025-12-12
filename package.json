@@ -1,7 +1,7 @@
 {
   "name": "@openpharma/asia-filings-mcp-server",
-  "version": "0.1.0",
-  "description": "MCP server for Asian financial filings (Japan EDINET, Korea DART) with XBRL support",
+  "version": "0.2.0",
+  "description": "MCP server for Asian financial filings (Japan EDINET, Korea DART) with advanced XBRL analysis",
   "main": "src/index.js",
   "type": "module",
   "bin": {

@@ -9,6 +9,8 @@ A Model Context Protocol (MCP) server that provides comprehensive access to Asia
 - 📋 **Complete Filing Access**: Retrieve filing histories and document details
 - 📊 **XBRL Parsing**: Full iXBRL/XBRL-JSON parsing with J-GAAP and K-GAAP taxonomy support
 - 🔬 **Dimensional Analysis**: Extract segment, geographic, and product breakdowns from financial data
+- 📈 **Time-Series Analysis**: Multi-period growth rates, trends, and mix analysis (Phase 2)
+- 🎯 **Fact Tables**: Build BI-ready fact tables with value search and deviation analysis (Phase 2)
 - 🏢 **Comprehensive Data**: Company info, financial statements, shareholders, executives, dividends
 - 🔌 **MCP Compatible**: Works seamlessly with Cursor, Claude Desktop, and other MCP clients
 - ⚡ **Free APIs**: Both EDINET and DART provide free access (API keys required)
@@ -27,7 +29,7 @@ The Data Analysis, Retrieval and Transfer System is Korea's electronic disclosur
 
 ## 📊 Complete API Reference
 
-The server provides a unified `asia-filings` tool with **16 powerful methods**:
+The server provides a unified `asia-filings` tool with **19 powerful methods** (including Phase 2 advanced analytics):
 
 ### Japan EDINET Methods
 
@@ -264,6 +266,81 @@ Filter filing arrays by date, report type, and other criteria.
 
 **Returns**: Filtered filing array with counts.
 
+### Advanced Analysis Methods (Phase 2)
+
+#### 17. Build Fact Table (`build_fact_table`)
+Build comprehensive fact table around a target value with business intelligence summaries. Searches for XBRL facts within a tolerance range and provides dimensional breakdowns.
+
+```json
+{
+  "method": "build_fact_table",
+  "country": "JP",
+  "company_id": "E01225",
+  "target_value": 1000000000000,
+  "tolerance": 50000000000,
+  "document_id": "S100XXXX",
+  "options": {
+    "maxRows": 25,
+    "showDimensions": true,
+    "sortBy": "deviation"
+  }
+}
+```
+
+**Parameters:**
+- `country`: "JP" (Japan) or "KR" (Korea)
+- `company_id`: EDINET code (JP) or corporate code (KR)
+- `target_value`: Target value to search around (in Yen or Won)
+- `tolerance`: Search range tolerance (±)
+- `document_id`: Optional document ID (JP) or "businessYear:reportCode" format (KR)
+- `options`: Table configuration (maxRows, sortBy, filters)
+
+**Returns**: Comprehensive fact table with:
+- Facts within value range sorted by deviation from target
+- Business intelligence summaries
+- Geographic and segment breakdowns
+- Deviation analysis and exact matches
+- Value statistics and business classifications
+
+#### 18. Search Facts by Value (`search_facts_by_value`)
+Alias for `build_fact_table` - search for XBRL facts within a value range. Same parameters and functionality as build_fact_table.
+
+#### 19. Time Series Analysis (`time_series_analysis`)
+Analyze financial metrics across multiple periods with period-over-period growth rates, geographic/segment mix changes, and trend detection.
+
+```json
+{
+  "method": "time_series_analysis",
+  "country": "KR",
+  "company_id": "00126380",
+  "options": {
+    "concept": "Revenue",
+    "periods": 4,
+    "includeGeography": true,
+    "includeSegments": true,
+    "showGrowthRates": true
+  }
+}
+```
+
+**Parameters:**
+- `country`: "JP" (Japan) or "KR" (Korea)
+- `company_id`: EDINET code (JP) or corporate code (KR)
+- `options`: Analysis configuration
+  - `concept`: Financial concept to track (e.g., "Revenue", "Assets", "NetIncome")
+  - `periods`: Number of periods to analyze (default: 4)
+  - `includeGeography`: Include geographic breakdowns
+  - `includeSegments`: Include segment breakdowns
+  - `showGrowthRates`: Calculate period-over-period growth rates
+
+**Returns**: Time-series analysis with:
+- Multi-period data table with facts across time
+- Period-over-period growth rates by geography/segment
+- Geographic mix analysis (composition changes over time)
+- Segment mix analysis (business segment evolution)
+- Trend detection (increasing, decreasing, stable)
+- Growth rate summaries and averages
+
 ## 📥 Installation & Setup
 
 ### Prerequisites
@@ -467,10 +544,12 @@ Korean companies use either K-GAAP (Korean GAAP) or IFRS depending on their size
 ```
 asia-filings-mcp-server/
 ├── src/
-│   ├── index.js         # MCP server implementation
-│   ├── edinet-api.js    # Japan EDINET API client
-│   ├── dart-api.js      # Korea DART API client
-│   └── xbrl-parser.js   # XBRL/iXBRL parser (J-GAAP, K-GAAP)
+│   ├── index.js              # MCP server implementation
+│   ├── edinet-api.js         # Japan EDINET API client
+│   ├── dart-api.js           # Korea DART API client
+│   ├── xbrl-parser.js        # XBRL/iXBRL parser (J-GAAP, K-GAAP)
+│   ├── fact-table-builder.js # Fact table generation & BI summaries
+│   └── time-series-analyzer.js # Multi-period growth & trend analysis
 ├── package.json
 └── README.md
 ```
@@ -502,18 +581,20 @@ asia-filings-mcp-server/
 | **API Cost** | Free | Free | Free (keys required) |
 | **Authentication** | User-Agent | None | API Keys |
 
-## 🚀 Future Enhancements
+## 🚀 Enhancement History
 
-### Phase 2 (✅ Completed)
+### Phase 2 (✅ Completed - v0.2.0)
 - ✅ XBRL parser for J-GAAP taxonomy (iXBRL parsing)
 - ✅ XBRL parser for K-GAAP taxonomy (XBRL-JSON parsing)
 - ✅ Dimensional fact extraction (segments, geography, products)
 - ✅ Fact classification and summary statistics
 - ✅ Advanced filtering and search capabilities
+- ✅ Fact table builder with business intelligence summaries
+- ✅ Time-series analysis with growth rates and trends
+- ✅ Geographic and segment mix analysis
+- ✅ Value-based fact search with deviation analysis
 
 ### Phase 3 (Planned)
-- Time-series financial analysis across multiple periods
-- Multi-statement fact table building
 - Advanced analytics (growth rates, financial ratios)
 - Cross-company financial comparison
 - Multi-market aggregation and benchmarking

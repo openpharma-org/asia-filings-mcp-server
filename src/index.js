@@ -9,11 +9,13 @@ import {
 
 import * as edinetApi from './edinet-api.js';
 import * as dartApi from './dart-api.js';
+import * as factTableBuilder from './fact-table-builder.js';
+import * as timeSeriesAnalyzer from './time-series-analyzer.js';
 
 const server = new Server(
   {
     name: 'asia-filings-mcp-server',
-    version: '0.1.0',
+    version: '0.2.0',
   },
   {
     capabilities: {
@@ -52,6 +54,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 'get_korea_executive_info',
                 'get_korea_dividend_info',
                 'get_korea_dimensional_facts',
+                // Advanced Analysis Methods (Phase 2)
+                'build_fact_table',
+                'search_facts_by_value',
+                'time_series_analysis',
                 // Utility methods
                 'filter_filings'
               ],
@@ -75,6 +81,11 @@ KOREA (DART):
 - get_korea_executive_info: Get executive/officer information
 - get_korea_dividend_info: Get dividend allocation information
 - get_korea_dimensional_facts: Get dimensional facts with breakdowns
+
+ADVANCED ANALYSIS (Phase 2):
+- build_fact_table: Build comprehensive fact table around target value with BI summaries
+- search_facts_by_value: Search for facts within value range (alias for build_fact_table)
+- time_series_analysis: Analyze financial metrics across multiple periods with growth rates
 
 UTILITIES:
 - filter_filings: Filter filing arrays by criteria`,
@@ -152,6 +163,30 @@ UTILITIES:
             search_criteria: {
               type: 'object',
               description: 'For dimensional_facts methods: Search criteria (concept, valueRange, period, hasDimensions)'
+            },
+            country: {
+              type: 'string',
+              description: 'For advanced analysis methods: Country code (JP for Japan, KR for Korea)',
+              examples: ['JP', 'KR']
+            },
+            company_id: {
+              type: 'string',
+              description: 'For advanced analysis methods: EDINET code (JP) or corp code (KR)',
+              examples: ['E01225', '00126380']
+            },
+            target_value: {
+              type: 'number',
+              description: 'For build_fact_table/search_facts_by_value: Target value to search around',
+              examples: [1000000000, 500000000000]
+            },
+            tolerance: {
+              type: 'number',
+              description: 'For build_fact_table/search_facts_by_value: Tolerance range (±)',
+              examples: [50000000, 100000000]
+            },
+            options: {
+              type: 'object',
+              description: 'For advanced analysis methods: Analysis options (maxRows, showDimensions, sortBy, concept, periods, includeGeography, includeSegments, showGrowthRates)'
             }
           },
           required: ['method'],
@@ -446,6 +481,58 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           report_code || '11011',
           search_criteria || {}
         );
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(results, null, 2)
+            }
+          ]
+        };
+      }
+
+      // ============= ADVANCED ANALYSIS METHODS (Phase 2) =============
+
+      case 'build_fact_table':
+      case 'search_facts_by_value': {
+        const { country, company_id, target_value, tolerance, document_id, options } = params;
+
+        if (!country || !company_id || target_value === undefined) {
+          throw new Error('country, company_id, and target_value parameters are required for build_fact_table/search_facts_by_value');
+        }
+
+        const results = await factTableBuilder.buildFactTable({
+          country,
+          companyId: company_id,
+          targetValue: target_value,
+          tolerance: tolerance || 50000000,
+          documentId: document_id,
+          options: options || {}
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(results, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'time_series_analysis': {
+        const { country, company_id, options } = params;
+
+        if (!country || !company_id) {
+          throw new Error('country and company_id parameters are required for time_series_analysis');
+        }
+
+        const results = await timeSeriesAnalyzer.timeSeriesAnalysis({
+          country,
+          companyId: company_id,
+          options: options || {}
+        });
+
         return {
           content: [
             {
