@@ -219,11 +219,27 @@ export function parseXBRLJSON(jsonData) {
 export function classifyFact(concept, taxonomy = 'unknown') {
   const conceptLower = concept.toLowerCase();
 
-  // Revenue concepts (English, Japanese, Korean)
+  // Expense concepts - CHECK FIRST (more specific patterns like costofsales, 매출원가)
+  if (conceptLower.includes('expense') || conceptLower.includes('cost') ||
+      conceptLower.includes('비용') || conceptLower.includes('원가') ||
+      conceptLower.includes('費用') || conceptLower.includes('経費') ||
+      conceptLower.includes('販売費')) {
+    if (conceptLower.includes('operating') || conceptLower.includes('영업') || conceptLower.includes('営業')) {
+      return 'Operating Expenses';
+    }
+    if (conceptLower.includes('costofsales') || conceptLower.includes('costofrevenue') ||
+        conceptLower.includes('매출원가') || conceptLower.includes('売上原価')) {
+      return 'Cost of Sales';
+    }
+    return 'Expenses';
+  }
+
+  // Revenue concepts (English, Japanese, Korean) - CHECK AFTER expenses
   if (conceptLower.includes('revenue') || conceptLower.includes('sales') ||
       conceptLower.includes('netrevenue') || conceptLower.includes('netsales') ||
       conceptLower.includes('매출') || conceptLower.includes('수익') ||
-      conceptLower.includes('売上') || conceptLower.includes('営業収益')) {
+      conceptLower.includes('売上') || conceptLower.includes('営業収益') ||
+      conceptLower.includes('収益')) {
     return 'Revenue';
   }
 
@@ -277,21 +293,6 @@ export function classifyFact(concept, taxonomy = 'unknown') {
       return 'Gross Profit';
     }
     return 'Net Income/Profit';
-  }
-
-  // Expense concepts (English, Japanese, Korean)
-  if (conceptLower.includes('expense') || conceptLower.includes('cost') ||
-      conceptLower.includes('비용') || conceptLower.includes('원가') ||
-      conceptLower.includes('費用') || conceptLower.includes('経費') ||
-      conceptLower.includes('販売費')) {
-    if (conceptLower.includes('operating') || conceptLower.includes('영업') || conceptLower.includes('営業')) {
-      return 'Operating Expenses';
-    }
-    if (conceptLower.includes('costofsales') || conceptLower.includes('costofrevenue') ||
-        conceptLower.includes('매출원가') || conceptLower.includes('売上原価')) {
-      return 'Cost of Sales';
-    }
-    return 'Expenses';
   }
 
   // Cash flow concepts (English, Japanese, Korean)
@@ -477,6 +478,9 @@ export {
   extractSegmentFromDimensions,
   extractProductFromDimensions
 } from './fact-table-builder.js';
+
+// Export parseFactValue for testing
+export { parseFactValue };
 
 export default {
   parseIXBRL,
