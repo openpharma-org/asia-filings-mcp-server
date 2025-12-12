@@ -210,7 +210,8 @@ export function parseXBRLJSON(jsonData) {
 }
 
 /**
- * Classify fact type based on concept name and taxonomy
+ * Classify fact type based on concept name and taxonomy (Enhanced)
+ * Supports J-GAAP (Japan) and K-GAAP (Korea) taxonomies
  * @param {string} concept - XBRL concept name
  * @param {string} taxonomy - Taxonomy (J-GAAP, K-GAAP, etc.)
  * @returns {string} Fact type classification
@@ -218,54 +219,115 @@ export function parseXBRLJSON(jsonData) {
 export function classifyFact(concept, taxonomy = 'unknown') {
   const conceptLower = concept.toLowerCase();
 
-  // Revenue concepts
+  // Revenue concepts (English, Japanese, Korean)
   if (conceptLower.includes('revenue') || conceptLower.includes('sales') ||
-      conceptLower.includes('매출') || conceptLower.includes('수익')) {
+      conceptLower.includes('netrevenue') || conceptLower.includes('netsales') ||
+      conceptLower.includes('매출') || conceptLower.includes('수익') ||
+      conceptLower.includes('売上') || conceptLower.includes('営業収益')) {
     return 'Revenue';
   }
 
-  // Asset concepts
-  if (conceptLower.includes('asset') || conceptLower.includes('자산')) {
-    if (conceptLower.includes('current') || conceptLower.includes('유동')) {
+  // Asset concepts (English, Japanese, Korean)
+  if (conceptLower.includes('asset') || conceptLower.includes('자산') || conceptLower.includes('資産')) {
+    if (conceptLower.includes('current') || conceptLower.includes('유동') || conceptLower.includes('流動')) {
       return 'Current Assets';
     }
-    if (conceptLower.includes('noncurrent') || conceptLower.includes('non-current') || conceptLower.includes('비유동')) {
+    if (conceptLower.includes('noncurrent') || conceptLower.includes('non-current') ||
+        conceptLower.includes('비유동') || conceptLower.includes('固定')) {
       return 'Non-current Assets';
+    }
+    if (conceptLower.includes('total') || conceptLower.includes('합계') || conceptLower.includes('総')) {
+      return 'Total Assets';
     }
     return 'Assets';
   }
 
-  // Liability concepts
-  if (conceptLower.includes('liabilit') || conceptLower.includes('부채')) {
-    if (conceptLower.includes('current') || conceptLower.includes('유동')) {
+  // Liability concepts (English, Japanese, Korean)
+  if (conceptLower.includes('liabilit') || conceptLower.includes('부채') || conceptLower.includes('負債')) {
+    if (conceptLower.includes('current') || conceptLower.includes('유동') || conceptLower.includes('流動')) {
       return 'Current Liabilities';
     }
-    if (conceptLower.includes('noncurrent') || conceptLower.includes('non-current') || conceptLower.includes('비유동')) {
+    if (conceptLower.includes('noncurrent') || conceptLower.includes('non-current') ||
+        conceptLower.includes('비유동') || conceptLower.includes('固定')) {
       return 'Non-current Liabilities';
+    }
+    if (conceptLower.includes('total') || conceptLower.includes('합계') || conceptLower.includes('総')) {
+      return 'Total Liabilities';
     }
     return 'Liabilities';
   }
 
-  // Equity concepts
-  if (conceptLower.includes('equity') || conceptLower.includes('자본')) {
+  // Equity concepts (English, Japanese, Korean)
+  if (conceptLower.includes('equity') || conceptLower.includes('자본') || conceptLower.includes('資本') ||
+      conceptLower.includes('netassets') || conceptLower.includes('stockholdersequity') ||
+      conceptLower.includes('純資産')) {
     return 'Equity';
   }
 
-  // Income/Profit concepts
+  // Income/Profit concepts (English, Japanese, Korean)
   if (conceptLower.includes('income') || conceptLower.includes('profit') ||
-      conceptLower.includes('당기순이익') || conceptLower.includes('이익')) {
-    return 'Income/Profit';
+      conceptLower.includes('당기순이익') || conceptLower.includes('이익') ||
+      conceptLower.includes('利益') || conceptLower.includes('所得') ||
+      conceptLower.includes('netincome') || conceptLower.includes('netprofit') ||
+      conceptLower.includes('当期純利益') || conceptLower.includes('税引前利益')) {
+    if (conceptLower.includes('operating') || conceptLower.includes('영업') || conceptLower.includes('営業')) {
+      return 'Operating Income';
+    }
+    if (conceptLower.includes('gross') || conceptLower.includes('매출총') || conceptLower.includes('売上総')) {
+      return 'Gross Profit';
+    }
+    return 'Net Income/Profit';
   }
 
-  // Expense concepts
+  // Expense concepts (English, Japanese, Korean)
   if (conceptLower.includes('expense') || conceptLower.includes('cost') ||
-      conceptLower.includes('비용') || conceptLower.includes('원가')) {
+      conceptLower.includes('비용') || conceptLower.includes('원가') ||
+      conceptLower.includes('費用') || conceptLower.includes('経費') ||
+      conceptLower.includes('販売費')) {
+    if (conceptLower.includes('operating') || conceptLower.includes('영업') || conceptLower.includes('営業')) {
+      return 'Operating Expenses';
+    }
+    if (conceptLower.includes('costofsales') || conceptLower.includes('costofrevenue') ||
+        conceptLower.includes('매출원가') || conceptLower.includes('売上原価')) {
+      return 'Cost of Sales';
+    }
     return 'Expenses';
   }
 
-  // Cash flow concepts
-  if (conceptLower.includes('cash') || conceptLower.includes('현금')) {
-    return 'Cash Flow';
+  // Cash flow concepts (English, Japanese, Korean)
+  if (conceptLower.includes('cash') || conceptLower.includes('현금') || conceptLower.includes('現金')) {
+    if (conceptLower.includes('operating') || conceptLower.includes('영업활동') || conceptLower.includes('営業活動')) {
+      return 'Cash Flow - Operating';
+    }
+    if (conceptLower.includes('investing') || conceptLower.includes('투자활동') || conceptLower.includes('投資活動')) {
+      return 'Cash Flow - Investing';
+    }
+    if (conceptLower.includes('financing') || conceptLower.includes('재무활동') || conceptLower.includes('財務活動')) {
+      return 'Cash Flow - Financing';
+    }
+    return 'Cash & Equivalents';
+  }
+
+  // Inventory concepts (English, Japanese, Korean)
+  if (conceptLower.includes('inventor') || conceptLower.includes('재고') || conceptLower.includes('棚卸')) {
+    return 'Inventory';
+  }
+
+  // Receivables concepts (English, Japanese, Korean)
+  if (conceptLower.includes('receivable') || conceptLower.includes('매출채권') ||
+      conceptLower.includes('売掛金') || conceptLower.includes('受取')) {
+    return 'Receivables';
+  }
+
+  // Payables concepts (English, Japanese, Korean)
+  if (conceptLower.includes('payable') || conceptLower.includes('매입채무') || conceptLower.includes('買掛金')) {
+    return 'Payables';
+  }
+
+  // Depreciation/Amortization (English, Japanese, Korean)
+  if (conceptLower.includes('depreciation') || conceptLower.includes('amortization') ||
+      conceptLower.includes('감가상각') || conceptLower.includes('償却')) {
+    return 'Depreciation/Amortization';
   }
 
   return 'Other';
@@ -408,6 +470,13 @@ export function buildSummary(facts) {
     dimensions: extractDimensions(facts)
   };
 }
+
+// Re-export enhanced dimension extraction from fact-table-builder
+export {
+  extractGeographyFromDimensions,
+  extractSegmentFromDimensions,
+  extractProductFromDimensions
+} from './fact-table-builder.js';
 
 export default {
   parseIXBRL,
