@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as xbrlParser from './xbrl-parser.js';
 
 const EDINET_API_BASE = 'https://disclosure.edinet-fsa.go.jp/api/v2';
 
@@ -290,10 +291,76 @@ export async function getDocumentsByDate(date) {
   }
 }
 
+/**
+ * Get and parse XBRL facts from a filing
+ * @param {string} docId - Document ID
+ * @returns {Promise<Object>} Parsed XBRL facts
+ */
+export async function getFilingFacts(docId) {
+  try {
+    // Download XBRL document (type 4)
+    const response = await axios.get(`${EDINET_API_BASE}/documents/${docId}`, {
+      params: { type: '4' },
+      headers: {
+        'Subscription-Key': EDINET_API_KEY
+      },
+      responseType: 'text',
+      timeout: 30000
+    });
+
+    // Parse iXBRL HTML
+    const parsed = xbrlParser.parseIXBRL(response.data);
+
+    return {
+      document_id: docId,
+      ...parsed,
+      summary: xbrlParser.buildSummary(parsed.facts)
+    };
+
+  } catch (error) {
+    throw new Error(`Failed to get filing facts: ${error.message}`);
+  }
+}
+
+/**
+ * Get dimensional facts from a filing
+ * @param {string} docId - Document ID
+ * @param {Object} searchCriteria - Search criteria
+ * @returns {Promise<Object>} Dimensional facts
+ */
+export async function getDimensionalFacts(docId, searchCriteria = {}) {
+  try {
+    const { facts, ...metadata } = await getFilingFacts(docId);
+
+    // Filter facts based on criteria
+    let filteredFacts = facts;
+    if (Object.keys(searchCriteria).length > 0) {
+      filteredFacts = xbrlParser.filterFacts(facts, searchCriteria);
+    }
+
+    // Extract dimensional breakdowns
+    const dimensions = xbrlParser.extractDimensions(filteredFacts);
+
+    return {
+      document_id: docId,
+      search_criteria: searchCriteria,
+      facts: filteredFacts,
+      total_found: filteredFacts.length,
+      dimensions,
+      ...metadata
+    };
+
+  } catch (error) {
+    throw new Error(`Failed to get dimensional facts: ${error.message}`);
+  }
+}
+
 export default {
   searchCompanies,
   getCompanyByEdinetCode,
   getCompanyFilings,
   getFilingDocument,
-  getDocumentsByDate
+  getDocumentsByDate,
+  getFilingFacts,
+  getDimensionalFacts
 };

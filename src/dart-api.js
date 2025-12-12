@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as xbrlParser from './xbrl-parser.js';
 
 const DART_API_BASE = 'https://opendart.fss.or.kr/api';
 
@@ -203,18 +204,59 @@ export async function getFinancialStatements(corpCode, businessYear, reportCode 
       throw new Error(`DART API error: ${response.data.message}`);
     }
 
+    // Parse XBRL data
+    const parsed = xbrlParser.parseXBRLJSON(response.data);
+
     return {
       corp_code: corpCode,
       business_year: businessYear,
       report_code: reportCode,
       report_type: reportCode === '11011' ? 'Annual' : reportCode === '11013' ? 'Q1' : reportCode === '11012' ? 'Q2' : 'Q3',
       statements: response.data.list || [],
-      source: 'DART Open API',
-      note: 'Financial statement items with account names, values, and classifications'
+      ...parsed,
+      summary: xbrlParser.buildSummary(parsed.facts),
+      source: 'DART Open API'
     };
 
   } catch (error) {
     throw new Error(`Failed to get financial statements: ${error.message}`);
+  }
+}
+
+/**
+ * Get dimensional facts from financial statements
+ * @param {string} corpCode - Corporate code
+ * @param {string} businessYear - Business year (YYYY)
+ * @param {string} reportCode - Report code
+ * @param {Object} searchCriteria - Search criteria
+ * @returns {Promise<Object>} Dimensional facts
+ */
+export async function getDimensionalFacts(corpCode, businessYear, reportCode, searchCriteria = {}) {
+  try {
+    const { facts, ...metadata } = await getFinancialStatements(corpCode, businessYear, reportCode);
+
+    // Filter facts based on criteria
+    let filteredFacts = facts;
+    if (Object.keys(searchCriteria).length > 0) {
+      filteredFacts = xbrlParser.filterFacts(facts, searchCriteria);
+    }
+
+    // Extract dimensional breakdowns
+    const dimensions = xbrlParser.extractDimensions(filteredFacts);
+
+    return {
+      corp_code: corpCode,
+      business_year: businessYear,
+      report_code: reportCode,
+      search_criteria: searchCriteria,
+      facts: filteredFacts,
+      total_found: filteredFacts.length,
+      dimensions,
+      ...metadata
+    };
+
+  } catch (error) {
+    throw new Error(`Failed to get dimensional facts: ${error.message}`);
   }
 }
 
@@ -350,5 +392,6 @@ export default {
   getMajorShareholders,
   getExecutiveInfo,
   getDividendInfo,
-  filterFilings
+  filterFilings,
+  getDimensionalFacts
 };

@@ -7,7 +7,8 @@ A Model Context Protocol (MCP) server that provides comprehensive access to Asia
 - 🇯🇵 **Japan Coverage**: Access 5,000+ companies via EDINET (Electronic Disclosure for Investors' NETwork)
 - 🇰🇷 **Korea Coverage**: Access 2,700+ companies via DART (Data Analysis, Retrieval and Transfer System)
 - 📋 **Complete Filing Access**: Retrieve filing histories and document details
-- 📊 **XBRL Data Extraction**: Parse and analyze J-GAAP and K-GAAP tagged financial data
+- 📊 **XBRL Parsing**: Full iXBRL/XBRL-JSON parsing with J-GAAP and K-GAAP taxonomy support
+- 🔬 **Dimensional Analysis**: Extract segment, geographic, and product breakdowns from financial data
 - 🏢 **Comprehensive Data**: Company info, financial statements, shareholders, executives, dividends
 - 🔌 **MCP Compatible**: Works seamlessly with Cursor, Claude Desktop, and other MCP clients
 - ⚡ **Free APIs**: Both EDINET and DART provide free access (API keys required)
@@ -26,7 +27,7 @@ The Data Analysis, Retrieval and Transfer System is Korea's electronic disclosur
 
 ## 📊 Complete API Reference
 
-The server provides a unified `asia-filings` tool with **13 powerful methods**:
+The server provides a unified `asia-filings` tool with **16 powerful methods**:
 
 ### Japan EDINET Methods
 
@@ -93,9 +94,42 @@ Get all filings submitted on a specific date.
 }
 ```
 
+#### 6. Get Filing Facts - XBRL Parser (`get_japan_filing_facts`)
+Extract and parse XBRL facts from a Japanese filing document. Parses inline XBRL (iXBRL) with J-GAAP taxonomy.
+
+```json
+{
+  "method": "get_japan_filing_facts",
+  "document_id": "S100XXXX"
+}
+```
+
+**Returns**: Parsed XBRL facts including:
+- Numeric facts with values, units, and decimals
+- Context information (periods, entities)
+- Dimensional data (segments, geography)
+- Summary statistics by fact type
+- Taxonomy classification
+
+#### 7. Get Dimensional Facts (`get_japan_dimensional_facts`)
+Extract dimensional breakdowns from Japanese XBRL filings (e.g., revenue by segment, geography, or product line).
+
+```json
+{
+  "method": "get_japan_dimensional_facts",
+  "document_id": "S100XXXX",
+  "search_criteria": {
+    "concept": "revenue",
+    "hasDimensions": true
+  }
+}
+```
+
+**Returns**: Filtered facts with dimensional analysis including geographic, segment, and product breakdowns.
+
 ### Korea DART Methods
 
-#### 6. Search Companies (`search_korea_companies`)
+#### 8. Search Companies (`search_korea_companies`)
 Find Korean companies by name.
 
 ```json
@@ -108,7 +142,7 @@ Find Korean companies by name.
 
 **Returns**: List of matching companies with corporate codes and recent filings.
 
-#### 7. Get Company by Corporate Code (`get_korea_company_by_code`)
+#### 9. Get Company by Corporate Code (`get_korea_company_by_code`)
 Look up a specific company using its corporate code.
 
 ```json
@@ -120,7 +154,7 @@ Look up a specific company using its corporate code.
 
 **Returns**: Comprehensive company profile including CEO, address, and business details.
 
-#### 8. Get Company Filings (`get_korea_company_filings`)
+#### 10. Get Company Filings (`get_korea_company_filings`)
 Retrieve filing history for a Korean company.
 
 ```json
@@ -136,8 +170,8 @@ Retrieve filing history for a Korean company.
 
 **Report Types**: A=Annual, Q=Quarterly
 
-#### 9. Get Financial Statements (`get_korea_financial_statements`)
-Extract XBRL financial data for a specific period.
+#### 11. Get Financial Statements - XBRL Parser (`get_korea_financial_statements`)
+Extract and parse XBRL financial data for a specific period. Parses K-GAAP/IFRS taxonomy data.
 
 ```json
 {
@@ -150,9 +184,31 @@ Extract XBRL financial data for a specific period.
 
 **Report Codes**: 11011=Annual, 11013=Q1, 11012=Q2, 11014=Q3
 
-**Returns**: Financial statement items with account names, values, and classifications.
+**Returns**: Parsed XBRL financial facts including:
+- Account names and IDs with K-GAAP concepts
+- Current term, previous term, and before-previous term values
+- Summary statistics by account type
+- Taxonomy classification (Assets, Liabilities, Equity, Revenue, Expenses)
 
-#### 10. Get Major Shareholders (`get_korea_major_shareholders`)
+#### 12. Get Dimensional Facts (`get_korea_dimensional_facts`)
+Extract dimensional breakdowns from Korean XBRL financial statements (e.g., revenue by business segment or geography).
+
+```json
+{
+  "method": "get_korea_dimensional_facts",
+  "corp_code": "00126380",
+  "business_year": "2023",
+  "report_code": "11011",
+  "search_criteria": {
+    "concept": "매출",
+    "hasValue": true
+  }
+}
+```
+
+**Returns**: Filtered financial facts with dimensional analysis by geography, segments, and products.
+
+#### 13. Get Major Shareholders (`get_korea_major_shareholders`)
 Retrieve major shareholder information.
 
 ```json
@@ -164,7 +220,7 @@ Retrieve major shareholder information.
 
 **Returns**: Shareholder names, ownership percentages, and change reasons.
 
-#### 11. Get Executive Info (`get_korea_executive_info`)
+#### 14. Get Executive Info (`get_korea_executive_info`)
 Get information about company executives and officers.
 
 ```json
@@ -176,7 +232,7 @@ Get information about company executives and officers.
 
 **Returns**: Executive names, positions, birth years, and careers.
 
-#### 12. Get Dividend Info (`get_korea_dividend_info`)
+#### 15. Get Dividend Info (`get_korea_dividend_info`)
 Retrieve dividend allocation information.
 
 ```json
@@ -191,7 +247,7 @@ Retrieve dividend allocation information.
 
 ### Utility Methods
 
-#### 13. Filter Filings (`filter_filings`)
+#### 16. Filter Filings (`filter_filings`)
 Filter filing arrays by date, report type, and other criteria.
 
 ```json
@@ -347,6 +403,55 @@ npm start
 ```
 *Track major shareholder positions and ownership changes*
 
+### XBRL Parsing and Analysis
+```json
+{
+  "method": "get_japan_filing_facts",
+  "document_id": "S100XXXX"
+}
+```
+*Parse inline XBRL from Japanese filings to extract structured financial data*
+
+```json
+{
+  "method": "get_korea_dimensional_facts",
+  "corp_code": "00126380",
+  "business_year": "2023",
+  "report_code": "11011",
+  "search_criteria": {
+    "concept": "revenue",
+    "hasDimensions": true
+  }
+}
+```
+*Extract dimensional breakdowns showing revenue by business segment or geography*
+
+## 📊 XBRL Parser Capabilities
+
+The server includes comprehensive XBRL parsing for both Japanese and Korean filings:
+
+### Japan (EDINET) - iXBRL Parser
+- **Format**: Inline XBRL (iXBRL) embedded in HTML
+- **Taxonomy**: J-GAAP (Japanese GAAP)
+- **Parsing**: Extracts facts from `ix:nonFraction` and `ix:nonNumeric` tags
+- **Contexts**: Full period, entity, and dimensional context extraction
+- **Scale Handling**: Automatic scale factor application (millions, billions)
+- **Number Formats**: Japanese negative number symbols (△, ▲, －)
+
+### Korea (DART) - XBRL-JSON Parser
+- **Format**: XBRL data in JSON format from API
+- **Taxonomy**: K-GAAP / IFRS
+- **Parsing**: Account names, IDs, and multi-period values
+- **Periods**: Current term, previous term, before-previous term
+- **Korean Support**: Native Korean account names (매출, 자산, 부채, 자본, etc.)
+
+### Common Features
+- **Fact Classification**: Automatic categorization (Assets, Liabilities, Equity, Revenue, Expenses, Cash Flow)
+- **Dimensional Extraction**: Geography, business segments, product lines
+- **Value Filtering**: Search by concept, value range, period, dimensions
+- **Summary Statistics**: Aggregated data by type, namespace, and dimension
+- **UTF-8 Support**: Full Japanese (漢字, ひらがな, カタカナ) and Korean (한글) character support
+
 ## 📊 Taxonomy Reference
 
 ### Japan - J-GAAP (Japanese GAAP)
@@ -364,7 +469,8 @@ asia-filings-mcp-server/
 ├── src/
 │   ├── index.js         # MCP server implementation
 │   ├── edinet-api.js    # Japan EDINET API client
-│   └── dart-api.js      # Korea DART API client
+│   ├── dart-api.js      # Korea DART API client
+│   └── xbrl-parser.js   # XBRL/iXBRL parser (J-GAAP, K-GAAP)
 ├── package.json
 └── README.md
 ```
@@ -398,18 +504,20 @@ asia-filings-mcp-server/
 
 ## 🚀 Future Enhancements
 
-### Phase 2 (Planned)
-- XBRL parser for J-GAAP taxonomy
-- XBRL parser for K-GAAP taxonomy
-- Dimensional fact extraction
-- Time-series financial analysis
-- Fact table building
+### Phase 2 (✅ Completed)
+- ✅ XBRL parser for J-GAAP taxonomy (iXBRL parsing)
+- ✅ XBRL parser for K-GAAP taxonomy (XBRL-JSON parsing)
+- ✅ Dimensional fact extraction (segments, geography, products)
+- ✅ Fact classification and summary statistics
+- ✅ Advanced filtering and search capabilities
 
 ### Phase 3 (Planned)
-- Advanced analytics (growth rates, ratios)
-- Cross-company comparison
-- Multi-market aggregation
-- ESG/sustainability data
+- Time-series financial analysis across multiple periods
+- Multi-statement fact table building
+- Advanced analytics (growth rates, financial ratios)
+- Cross-company financial comparison
+- Multi-market aggregation and benchmarking
+- ESG/sustainability data extraction
 
 ### Additional Markets (Under Investigation)
 - Hong Kong Stock Exchange (HKEx)
@@ -446,7 +554,7 @@ MIT License - see LICENSE file for details
 2. **API Keys**: Both services require free API key registration
 3. **Rate Limits**: DART has 1,000 requests/minute limit; EDINET limits unspecified
 4. **Historical Data**: Limited to XBRL mandate dates (2008+ for Japan)
-5. **XBRL Parsing**: Advanced XBRL parsing features are planned for Phase 2
+5. **XBRL Contexts**: Some advanced dimensional contexts may require additional parsing
 
 ## 💡 Tips
 

@@ -41,6 +41,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 'get_japan_company_filings',
                 'get_japan_filing_document',
                 'get_japan_documents_by_date',
+                'get_japan_filing_facts',
+                'get_japan_dimensional_facts',
                 // Korea DART methods
                 'search_korea_companies',
                 'get_korea_company_by_code',
@@ -49,6 +51,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 'get_korea_major_shareholders',
                 'get_korea_executive_info',
                 'get_korea_dividend_info',
+                'get_korea_dimensional_facts',
                 // Utility methods
                 'filter_filings'
               ],
@@ -60,6 +63,8 @@ JAPAN (EDINET):
 - get_japan_company_filings: Get filing history for Japanese company
 - get_japan_filing_document: Download specific filing document
 - get_japan_documents_by_date: Get all filings for a specific date
+- get_japan_filing_facts: Extract XBRL facts from filing (J-GAAP)
+- get_japan_dimensional_facts: Get dimensional facts with breakdowns
 
 KOREA (DART):
 - search_korea_companies: Search Korean companies by name
@@ -69,6 +74,7 @@ KOREA (DART):
 - get_korea_major_shareholders: Get major shareholder information
 - get_korea_executive_info: Get executive/officer information
 - get_korea_dividend_info: Get dividend allocation information
+- get_korea_dimensional_facts: Get dimensional facts with breakdowns
 
 UTILITIES:
 - filter_filings: Filter filing arrays by criteria`,
@@ -142,6 +148,10 @@ UTILITIES:
             filters: {
               type: 'object',
               description: 'For filter_filings: Filter criteria (startDate, endDate, reportType)'
+            },
+            search_criteria: {
+              type: 'object',
+              description: 'For dimensional_facts methods: Search criteria (concept, valueRange, period, hasDimensions)'
             }
           },
           required: ['method'],
@@ -253,6 +263,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
 
         const results = await edinetApi.getDocumentsByDate(date);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(results, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'get_japan_filing_facts': {
+        const { document_id } = params;
+        if (!document_id) {
+          throw new Error('document_id parameter is required for get_japan_filing_facts');
+        }
+
+        const results = await edinetApi.getFilingFacts(document_id);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(results, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'get_japan_dimensional_facts': {
+        const { document_id, search_criteria } = params;
+        if (!document_id) {
+          throw new Error('document_id parameter is required for get_japan_dimensional_facts');
+        }
+
+        const results = await edinetApi.getDimensionalFacts(document_id, search_criteria || {});
         return {
           content: [
             {
@@ -380,6 +424,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
 
         const results = await dartApi.getDividendInfo(corp_code, business_year);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(results, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'get_korea_dimensional_facts': {
+        const { corp_code, business_year, report_code, search_criteria } = params;
+        if (!corp_code || !business_year) {
+          throw new Error('corp_code and business_year parameters are required for get_korea_dimensional_facts');
+        }
+
+        const results = await dartApi.getDimensionalFacts(
+          corp_code,
+          business_year,
+          report_code || '11011',
+          search_criteria || {}
+        );
         return {
           content: [
             {
