@@ -1,0 +1,39 @@
+{
+  "name": "@openpharma/asia-filings-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Asian financial filings (Japan EDINET, Korea DART) with XBRL support",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "asia-filings-mcp-server": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test-api.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "financial-data",
+    "asia",
+    "japan",
+    "korea",
+    "edinet",
+    "dart",
+    "xbrl",
+    "financial-filings",
+    "j-gaap",
+    "k-gaap"
+  ],
+  "author": "OpenPharma",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openpharma-org/asia-filings-mcp-server.git"
+  }
+}
