@@ -1,4 +1,4 @@
-# Asian Financial Filings MCP Server
+# Unofficial Asian Financial Filings MCP Server
 
 A Model Context Protocol (MCP) server that provides comprehensive access to Asian financial filings via Japan's EDINET and South Korea's DART systems. This server enables AI assistants and applications to search, retrieve, and analyze financial statements and XBRL data from 7,700+ Asian companies.
 
@@ -359,9 +359,7 @@ You'll need API keys from both services (free registration):
    - Receive your API key
    - Rate limit: 1,000 requests/minute
 
-### Quick Start with Claude Desktop
-
-Add to your Claude Desktop MCP configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+### Usage
 
 ```json
 {
@@ -376,46 +374,6 @@ Add to your Claude Desktop MCP configuration (`~/Library/Application Support/Cla
     }
   }
 }
-```
-
-### Installation from NPM (Coming Soon)
-
-```bash
-npm install -g @openpharma/asia-filings-mcp-server
-```
-
-Then in your MCP config:
-
-```json
-{
-  "mcpServers": {
-    "asia-filings": {
-      "command": "npx",
-      "args": ["@openpharma/asia-filings-mcp-server"],
-      "env": {
-        "EDINET_API_KEY": "your-edinet-api-key-here",
-        "DART_API_KEY": "your-dart-api-key-here"
-      }
-    }
-  }
-}
-```
-
-### Development Setup
-
-```bash
-# Clone the repository
-cd asia-filings-mcp-server
-
-# Install dependencies
-npm install
-
-# Set environment variables
-export EDINET_API_KEY="your-edinet-api-key"
-export DART_API_KEY="your-dart-api-key"
-
-# Run the server
-npm start
 ```
 
 ## 🌍 Coverage
@@ -554,13 +512,6 @@ asia-filings-mcp-server/
 └── README.md
 ```
 
-### Data Flow
-
-1. **MCP Client** (Claude, Cursor) calls `asia-filings` tool
-2. **MCP Server** routes to appropriate method (Japan or Korea)
-3. **API Client** queries EDINET or DART API
-4. **Response** returned in JSON format
-
 ### API Compliance
 
 - ✅ **Free APIs**: Both EDINET and DART are free to use
@@ -580,78 +531,3 @@ asia-filings-mcp-server/
 | **Data Source** | data.sec.gov | filings.xbrl.org | EDINET, DART |
 | **API Cost** | Free | Free | Free (keys required) |
 | **Authentication** | User-Agent | None | API Keys |
-
-## 🚀 Enhancement History
-
-### Phase 2 (✅ Completed - v0.2.0)
-- ✅ XBRL parser for J-GAAP taxonomy (iXBRL parsing)
-- ✅ XBRL parser for K-GAAP taxonomy (XBRL-JSON parsing)
-- ✅ Dimensional fact extraction (segments, geography, products)
-- ✅ Fact classification and summary statistics
-- ✅ Advanced filtering and search capabilities
-- ✅ Fact table builder with business intelligence summaries
-- ✅ Time-series analysis with growth rates and trends
-- ✅ Geographic and segment mix analysis
-- ✅ Value-based fact search with deviation analysis
-
-### Phase 3 (Planned)
-- Advanced analytics (growth rates, financial ratios)
-- Cross-company financial comparison
-- Multi-market aggregation and benchmarking
-- ESG/sustainability data extraction
-
-### Additional Markets (Under Investigation)
-- Hong Kong Stock Exchange (HKEx)
-- Taiwan Stock Exchange (TWSE)
-- Singapore Exchange (SGX) - filing submission only currently
-
-## 📚 Resources
-
-- 🇯🇵 **EDINET**: [Japan FSA EDINET](https://disclosure.edinet-fsa.go.jp/)
-- 🇰🇷 **DART**: [Korea FSS Open DART](https://opendart.fss.or.kr/)
-- 🇰🇷 **English DART**: [English DART Portal](https://englishdart.fss.or.kr/)
-- 📖 **XBRL Japan**: [XBRL Japan Inc.](https://www.xbrl.or.jp/modules/pico5/index.php?ml_lang=en)
-
-## 🤝 Contributing
-
-Contributions are welcome! This is an open-source project aimed at improving access to Asian financial data.
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## ⚠️ Important Notes
-
-- This is an unofficial tool not affiliated with Japan FSA or Korea FSS
-- API keys are required for both EDINET and DART (free registration)
-- Always verify critical financial data through official regulatory sources
-- EDINET filings are available from 2008 onwards
-- DART covers companies on KOSPI, KOSDAQ, and KONEX exchanges
-- Some Japanese content may require UTF-8 encoding support
-
-## 🐛 Known Limitations
-
-1. **Language**: EDINET documentation is primarily in Japanese
-2. **API Keys**: Both services require free API key registration
-3. **Rate Limits**: DART has 1,000 requests/minute limit; EDINET limits unspecified
-4. **Historical Data**: Limited to XBRL mandate dates (2008+ for Japan)
-5. **XBRL Contexts**: Some advanced dimensional contexts may require additional parsing
-
-## 💡 Tips
-
-- **Register for API keys early**: Both services have simple registration but require approval
-- **Use specific codes**: EDINET codes (Japan) and corp codes (Korea) for fastest results
-- **Check date ranges**: Some companies may have limited filing history
-- **UTF-8 support**: Ensure your environment supports Japanese and Korean characters
-- **Rate limiting**: DART enforces 1,000 req/min; EDINET is unspecified but be conservative
-
----
-
-**Built with ❤️ for the global financial data community**
-
-Part of the OpenPharma MCP Server collection providing comprehensive access to financial data from:
-- 🇺🇸 [SEC EDGAR](https://github.com/openpharma-org/sec-mcp)
-- 🇪🇺 [EU Filings](https://github.com/openpharma-org/eu-filings-mcp-server)
-- 🌏 **Asia Filings** (this server)
-
-For questions, issues, or feature requests, please visit our [GitHub repository](https://github.com/openpharma-org/asia-filings-mcp-server).
