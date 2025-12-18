@@ -2,20 +2,20 @@
 
 A Model Context Protocol (MCP) server that provides comprehensive access to Asian financial filings via Japan's EDINET and South Korea's DART systems. This server enables AI assistants and applications to search, retrieve, and analyze financial statements and XBRL data from 7,700+ Asian companies.
 
-## 🚀 Key Features
+## Key Features
 
-- 🇯🇵 **Japan Coverage**: Access 5,000+ companies via EDINET (Electronic Disclosure for Investors' NETwork)
-- 🇰🇷 **Korea Coverage**: Access 2,700+ companies via DART (Data Analysis, Retrieval and Transfer System)
-- 📋 **Complete Filing Access**: Retrieve filing histories and document details
-- 📊 **XBRL Parsing**: Full iXBRL/XBRL-JSON parsing with J-GAAP and K-GAAP taxonomy support
-- 🔬 **Dimensional Analysis**: Extract segment, geographic, and product breakdowns from financial data
-- 📈 **Time-Series Analysis**: Multi-period growth rates, trends, and mix analysis (Phase 2)
-- 🎯 **Fact Tables**: Build BI-ready fact tables with value search and deviation analysis (Phase 2)
-- 🏢 **Comprehensive Data**: Company info, financial statements, shareholders, executives, dividends
-- 🔌 **MCP Compatible**: Works seamlessly with Cursor, Claude Desktop, and other MCP clients
-- ⚡ **Free APIs**: Both EDINET and DART provide free access (API keys required)
+- **Japan Coverage**: Access 5,000+ companies via EDINET (Electronic Disclosure for Investors' NETwork)
+- **Korea Coverage**: Access 2,700+ companies via DART (Data Analysis, Retrieval and Transfer System)
+- **Complete Filing Access**: Retrieve filing histories and document details
+- **XBRL Parsing**: Full iXBRL/XBRL-JSON parsing with J-GAAP and K-GAAP taxonomy support
+- **Dimensional Analysis**: Extract segment, geographic, and product breakdowns from financial data
+- **Time-Series Analysis**: Multi-period growth rates, trends, and mix analysis (Phase 2)
+- **Fact Tables**: Build BI-ready fact tables with value search and deviation analysis (Phase 2)
+- **Comprehensive Data**: Company info, financial statements, shareholders, executives, dividends
+- **MCP Compatible**: Works seamlessly with Cursor, Claude Desktop, and other MCP clients
+- **Free APIs**: Both EDINET and DART provide free access (API keys required)
 
-## 🎯 What are EDINET and DART?
+## What are EDINET and DART?
 
 ### EDINET (Japan)
 The Electronic Disclosure for Investors' NETwork is Japan's mandatory electronic reporting system operated by the Financial Services Agency (FSA). Since 2008, all listed companies and major fund-raising entities must file their disclosure documents using EDINET in XBRL format with J-GAAP (Japanese GAAP) taxonomy.
@@ -27,7 +27,42 @@ The Data Analysis, Retrieval and Transfer System is Korea's electronic disclosur
 
 **Data Source**: [Open DART](https://opendart.fss.or.kr/) - Free public API with key registration
 
-## 📊 Complete API Reference
+## Installation & Setup
+
+### Prerequisites
+
+You'll need API keys from both services (free registration):
+
+1. **EDINET API Key**:
+   - Visit: https://disclosure.edinet-fsa.go.jp/
+   - Sign up with email
+   - Complete multi-factor authentication
+   - Receive your Subscription-Key
+
+2. **DART API Key**:
+   - Visit: https://opendart.fss.or.kr/intro/main.do
+   - Register for free API access
+   - Receive your API key
+   - Rate limit: 1,000 requests/minute
+
+### Usage
+
+```json
+{
+  "mcpServers": {
+    "asia-filings": {
+      "command": "node",
+      "args": ["/path/to/asia-filings-mcp-server/build/index.js"],
+      "env": {
+        "EDINET_API_KEY": "your-edinet-api-key-here",
+        "DART_API_KEY": "your-dart-api-key-here"
+      }
+    }
+  }
+}
+```
+
+## Complete API Reference
 
 The server provides a unified `asia-filings` tool with **19 powerful methods** (including Phase 2 advanced analytics):
 
@@ -341,42 +376,7 @@ Analyze financial metrics across multiple periods with period-over-period growth
 - Trend detection (increasing, decreasing, stable)
 - Growth rate summaries and averages
 
-## 📥 Installation & Setup
-
-### Prerequisites
-
-You'll need API keys from both services (free registration):
-
-1. **EDINET API Key**:
-   - Visit: https://disclosure.edinet-fsa.go.jp/
-   - Sign up with email
-   - Complete multi-factor authentication
-   - Receive your Subscription-Key
-
-2. **DART API Key**:
-   - Visit: https://opendart.fss.or.kr/intro/main.do
-   - Register for free API access
-   - Receive your API key
-   - Rate limit: 1,000 requests/minute
-
-### Usage
-
-```json
-{
-  "mcpServers": {
-    "asia-filings": {
-      "command": "node",
-      "args": ["/path/to/asia-filings-mcp-server/src/index.js"],
-      "env": {
-        "EDINET_API_KEY": "your-edinet-api-key-here",
-        "DART_API_KEY": "your-dart-api-key-here"
-      }
-    }
-  }
-}
-```
-
-## 🌍 Coverage
+## Coverage
 
 ### Japan (EDINET)
 - **Companies**: ~5,000 listed companies + 3,000 investment funds
@@ -396,7 +396,7 @@ You'll need API keys from both services (free registration):
 - **Disclosure Types**: Annual, quarterly, major issues, equity, issuance, miscellaneous
 - **Additional Data**: Shareholder info, executive details, dividends
 
-## 🎯 Real-World Use Cases
+## Real-World Use Cases
 
 ### Investment Research
 ```json
@@ -461,7 +461,7 @@ You'll need API keys from both services (free registration):
 ```
 *Extract dimensional breakdowns showing revenue by business segment or geography*
 
-## 📊 XBRL Parser Capabilities
+## XBRL Parser Capabilities
 
 The server includes comprehensive XBRL parsing for both Japanese and Korean filings:
 
@@ -487,7 +487,7 @@ The server includes comprehensive XBRL parsing for both Japanese and Korean fili
 - **Summary Statistics**: Aggregated data by type, namespace, and dimension
 - **UTF-8 Support**: Full Japanese (漢字, ひらがな, カタカナ) and Korean (한글) character support
 
-## 📊 Taxonomy Reference
+## Taxonomy Reference
 
 ### Japan - J-GAAP (Japanese GAAP)
 Japanese companies follow J-GAAP taxonomy which differs from US-GAAP and IFRS. The EDINET taxonomy is designed to comply with Global Filing Manual (GFM) rules.
@@ -497,7 +497,7 @@ Japanese companies follow J-GAAP taxonomy which differs from US-GAAP and IFRS. T
 ### Korea - K-GAAP / IFRS
 Korean companies use either K-GAAP (Korean GAAP) or IFRS depending on their size and listing status. Financial statements are available in XBRL format through the DART API.
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 asia-filings-mcp-server/
@@ -512,14 +512,7 @@ asia-filings-mcp-server/
 └── README.md
 ```
 
-### API Compliance
-
-- ✅ **Free APIs**: Both EDINET and DART are free to use
-- ✅ **Rate Limiting**: Conservative request pacing implemented
-- ✅ **Authentication**: API keys required (free registration)
-- ✅ **Error Recovery**: Graceful degradation with error messages
-
-## 🔄 Comparison with SEC/EU Servers
+## Comparison with SEC/EU Servers
 
 | Feature | SEC EDGAR | EU Filings (ESEF) | Asia Filings |
 |---------|-----------|-------------------|--------------|

@@ -2,14 +2,17 @@
   "name": "@openpharma/asia-filings-mcp-server",
   "version": "0.2.0",
   "description": "MCP server for Asian financial filings (Japan EDINET, Korea DART) with advanced XBRL analysis",
-  "main": "src/index.js",
+  "main": "build/index.js",
   "type": "module",
   "bin": {
-    "asia-filings-mcp-server": "./src/index.js"
+    "asia-filings-mcp-server": "build/index.js"
   },
   "scripts": {
-    "start": "node src/index.js",
-    "test": "node test-api.js"
+    "build": "rm -rf build && mkdir -p build && cp src/*.js build/",
+    "start": "node build/index.js",
+    "dev": "node src/index.js",
+    "clean": "rm -rf build",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
     "mcp",

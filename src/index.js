@@ -598,4 +598,5 @@ async function main() {
 
 main().catch((error) => {
   process.stderr.write(`Server error: ${error}\n`);
-  process.exit(1);\n});
+  process.exit(1);
+});
